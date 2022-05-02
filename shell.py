@@ -1,5 +1,6 @@
 import os
 
+os.system("clear")
 current_dir = os.getcwd()
 
 print("Available commands:\n ls\n la\n pwd\n cd\n cp\n mv\n rm\n touch *\n\
@@ -16,22 +17,51 @@ def la():
         print(element, end='\t ')                                           
     print()
 
-def pwd():
-    print('  ' + current_dir)
-
 def cd(to):
     global current_dir
     if to == '..':
         current_dir = current_dir[0:current_dir.rfind('/')]
+    elif to == '.':
+        return
     else:
         current_dir += '/' + to
 
-def execute(command):
-    os.system(command)
+def cd_home_dir():
+    count = 0
+    global current_dir
+    for i in range(len(current_dir)):
+        if current_dir[i] == '/':
+            count += 1
+        if count == 3:
+            current_dir = current_dir[0:i + 1]
+            return
+
+def make_single_command(cmd):
+    cmd = cmd.split()
+    new_cmd = ''
+    for i in range(len(cmd) - 1):
+        new_cmd += cmd[i] + ' '
+    new_cmd += ' ' + current_dir + '/' + cmd[len(cmd) - 1]
+    return new_cmd
+
+def make_double_command(cmd):
+    cmd = cmd.split()
+    new_cmd = ''
+    for i in range(len(cmd) - 2):
+        new_cmd += cmd[i] + ' '
+    new_cmd += ' ' + current_dir + '/' + cmd[len(cmd) - 2] + \
+            ' ' + current_dir + '/' + cmd[len(cmd) - 1]
+    return new_cmd
+
+
+single_command_dict = ['rm', 'touch', 'vim', 'python3', 'g++', 'clang++',
+        'mkdir', 'rmdir']
+double_command_dict = ['cp', 'mv']
 
 while True:
     print(current_dir + '$', end=' ')
     command = input()
+    switch = command.split()[0]
     if command == 'exit shell':
         break
     elif command == 'ls':
@@ -39,29 +69,18 @@ while True:
     elif command == 'la':
         la()
     elif command == 'pwd':
-        pwd()
-    elif command[0:2] == 'cd':
-        cd(command.split()[1])
-    elif command[0:2] == 'cp':
-        execute('cp ' + current_dir + '/' + command.split()[1] + \
-                ' ' + current_dir + '/' + command.split()[2])
-    elif command[0:2] == 'mv':
-        execute('mv ' + current_dir + '/' + command.split()[1] + \
-                ' ' + current_dir + '/' + command.split()[2])
-    elif command[0:2] == 'rm':
-        execute('rm ' + current_dir + '/' + command.split()[1])
-    elif command.split()[0] == 'touch':
-        execute('touch ' + current_dir + '/' + command.split()[1])
-    elif command.split()[0] == 'vim':
-        execute('vim ' + current_dir + '/' + command.split()[1])
-    elif command.split()[0] == 'python3':
-        execute('python3 ' + current_dir + '/' + command.split()[1])
-    elif command.split()[0] == 'g++':
-        execute('g++ ' + current_dir + '/' + command.split()[1])
-    elif command.split()[0] == 'clang++':
-        execute('clang++ ' + current_dir + '/' + command.split()[1])
-    elif command[0:2] == './':
-        execute('./ ' + current_dir + '/' + command.split()[1])
+        print(current_dir)
+    elif command == 'clear':
+        os.system(command)
+    elif command.split()[0] == 'cd':
+        if len(command.split()) > 1:
+            cd(command.split()[1])
+        else: 
+            cd_home_dir()
+    elif command.split()[0] in single_command_dict:
+        os.system(make_single_command(command))
+    elif command.split()[0] in double_command_dict:
+        os.system(make_double_command(command))
     else:
-        print('Invalid command!')
+        print("invalid command")
 
