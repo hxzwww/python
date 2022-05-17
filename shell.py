@@ -3,8 +3,8 @@ import os
 os.system("clear")
 current_dir = os.getcwd()
 
-print("Available commands:\n ls\n la\n pwd\n cd\n cp\n mv\n rm\n touch *\n\
- vim *\n python3 *.py\n g++ *.cpp\n clang++ *.cpp\n ./*\n exit shell\n")
+#print("Available commands:\n ls\n la\n pwd\n cd\n cp\n mv\n rm\n touch *\n\
+# vim *\n python3 *.py\n g++ *.cpp\n clang++ *.cpp\n ./*\n exit shell\n")
 
 def ls():
     for element in os.listdir(current_dir):
@@ -17,24 +17,34 @@ def la():
         print(element, end='\t ')                                           
     print()
 
+def cd_home_dir():                                                                                                      
+    count = 0                                                                                                           
+    global current_dir                                                                                                  
+    for i in range(len(current_dir)):                                                                                   
+        if current_dir[i] == '/':                                                                                       
+            count += 1                                                                                                  
+        if count == 3:                                                                                                  
+            current_dir = current_dir[0:i]                                                                              
+            return
+
 def cd(to):
     global current_dir
+    if to == '~':
+        cd_home_dir()
+        return
     if to == '..':
         current_dir = current_dir[0:current_dir.rfind('/')]
     elif to == '.':
         return
     else:
-        current_dir += '/' + to
-
-def cd_home_dir():
-    count = 0
-    global current_dir
-    for i in range(len(current_dir)):
-        if current_dir[i] == '/':
-            count += 1
-        if count == 3:
-            current_dir = current_dir[0:i + 1]
-            return
+        exists = False
+        for element in os.listdir(current_dir):
+            if element == to:
+                exists = True
+        if exists:
+            current_dir += '/' + to
+        else:
+            print('no such file or directory')
 
 def make_single_command(cmd):
     cmd = cmd.split()
@@ -70,11 +80,13 @@ while True:
         la()
     elif command == 'pwd':
         print(current_dir)
-    elif command == 'clear':
+    elif command == 'clear' or command == 'poweroff':
         os.system(command)
     elif command.split()[0] == 'cd':
         if len(command.split()) > 1:
-            cd(command.split()[1])
+            tmp = command.split()[1].split('/')
+            for i in tmp:
+                cd(i)
         else: 
             cd_home_dir()
     elif command.split()[0] in single_command_dict:
